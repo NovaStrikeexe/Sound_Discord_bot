@@ -8,6 +8,7 @@ import shutil
 bot_token = 'bot_token'
 bot_command_prefix = 'NS-'
 bot = commands.Bot(command_prefix=bot_command_prefix)
+bot.remove_command('help')
 
 
 @bot.event
@@ -61,14 +62,14 @@ async def play(ctx, url: str):
             if length != 0:
                 print("Song done, playing next queued.\n")
                 print(f"Songs still in queue: {still_q}")
-                song_there = os.path.isfile("song.mp3")
+                song_there = os.path.isfile("song.webm")
                 if song_there:
-                    os.remove("song.mp3")
+                    os.remove("song.webm")
                 shutil.move(song_path, main_location)
                 for file in os.listdir("./"):
                     if file.endswith(".webm"):
-                        os.rename(file, 'song.mp3')
-                voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: check_q())
+                        os.rename(file, 'song.webm')
+                voice.play(discord.FFmpegPCMAudio("song.webm"), after=lambda e: check_q())
                 voice.source = discord.PCMVolumeTransformer(voice.source)
                 voice.source.volume = 1
             else:
@@ -78,10 +79,10 @@ async def play(ctx, url: str):
             queues.clear()
             print("No any song were queued before the ending of the last song\n")
 
-    song_there = os.path.isfile("song.mp3")
+    song_there = os.path.isfile("song.webm")
     try:
         if song_there:
-            os.remove("song.mp3")
+            os.remove("song.webm")
             queues.clear()
             print("Removed old song(s) file")
     except PermissionError:
@@ -103,7 +104,7 @@ async def play(ctx, url: str):
     ydl_opts = {
         'format': 'bestaudio/best',
         'extractaudio': True,
-        'audioformat': 'mp3',
+        'audioformat': 'webm',
         'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
         'restrictfilenames': True,
         'noplaylist': True,
@@ -122,8 +123,8 @@ async def play(ctx, url: str):
     for file in os.listdir():
         if file.endswith(".webm"):
             name = file
-            os.rename(file, 'song.mp3')
-    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: check_q())
+            os.rename(file, 'song.webm')
+    voice.play(discord.FFmpegPCMAudio("song.webm"), after=lambda e: check_q())
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 1
 
@@ -137,7 +138,6 @@ async def stop(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
     queues.clear()
-
 
     if voice and voice.is_playing():
         print("Music stoped.")
@@ -182,7 +182,7 @@ async def queue(ctx, url: str):
     ydl_opts = {
         'format': 'bestaudio/best',
         'extractaudio': True,
-        'audioformat': 'mp3',
+        'audioformat': 'webm',
         'outtmpl': q_path,
         'restrictfilenames': True,
         'noplaylist': True,
@@ -200,6 +200,25 @@ async def queue(ctx, url: str):
     await ctx.send("Adding song " + str(q_num) + " to the queue.")
 
     print("Song added to queue.\n")
+
+
+# @bot.command()
+@bot.command(pass_context=True, aliases=['h', 'he', '?'])
+async def help(ctx):
+    print("Using help....")
+    author = ctx.message.author
+    emb = discord.Embed(
+        colour=discord.Color.dark_green()
+    )
+    emb.set_author(name='Help')
+    emb.add_field(name='{}queue'.format(bot_command_prefix), value='Adding music for queue')
+    emb.add_field(name='{}resume'.format(bot_command_prefix), value='Resume plaing music ')
+    emb.add_field(name='{}stop'.format(bot_command_prefix), value='Stoping plaing music ')
+    emb.add_field(name='{}play'.format(bot_command_prefix), value='Plaing music ')
+    emb.add_field(name='{}join'.format(bot_command_prefix), value='Joining to voice chat')
+    emb.add_field(name='{}leave'.format(bot_command_prefix), value='Leaving from voice chat')
+
+    await ctx.send(embed=emb)
 
 
 bot.run(bot_token)
