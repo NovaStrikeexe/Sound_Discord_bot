@@ -9,7 +9,11 @@ bot_token = 'bot_token'
 bot_command_prefix = 'NS-'
 bot = commands.Bot(command_prefix=bot_command_prefix)
 bot.remove_command('help')
+""" 
+Этот дискорд бот создан:
+Мещерягин СА
 
+"""
 
 @bot.event
 async def on_ready():
